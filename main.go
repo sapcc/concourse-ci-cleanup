@@ -66,7 +66,7 @@ func init() {
 	flag.StringVar(&concoursePassword, "concourse-password", "", "Use concourse URL [CONCOURSE_PASSWORD]")
 	flag.StringVar(&workerPrefix, "worker-prefix", workerPrefix, "Prefix to identify stale workers [WORKER_PREFIX]")
 	flag.BoolVar(&runVolumeCleanup, "volume-cleanup", runVolumeCleanup, "Cleanup volumes in Openstack [VOLUME_CLEANUP]")
-	flag.StringVar(&volumePrefix, "volume-prefix", volumePrefix, "Prefix to identify stale workers [VOLUME_PREFIX]")
+	flag.StringVar(&volumePrefix, "volume-prefix", volumePrefix, "Prefix to identify unused volumes [VOLUME_PREFIX]")
 	flag.StringVar(&o.IdentityEndpoint, "os-auth-url", o.IdentityEndpoint, "Openstack auth url [OS_AUTH_URL]")
 	flag.StringVar(&o.ApplicationCredentialID, "os-application-credential-id", o.ApplicationCredentialID, "Openstack application credential id [OS_APPLICATION_CREDENTIAL_ID]")
 	flag.StringVar(&o.ApplicationCredentialSecret, "os-application-credential-secret", "", "Openstack application credential secret [OS_APPLICATION_CREDENTIAL_SECRET]")
@@ -195,14 +195,12 @@ func cleanupStaleWorkers() error {
 	}
 
 	for _, worker := range workers {
-		if worker.State == "stalled" && strings.HasPrefix(worker.Name, workerPrefix) {
-			if !inNodeList(worker.Name) {
-				err := concourseClient.PruneWorker(worker.Name)
-				if err != nil {
-					glog.Errorf("Could not prune stale worker %s: %v", worker.Name, err)
-				} else {
-					glog.Infof("Stale worker %s has been pruned.", worker.Name)
-				}
+		if (worker.State == "stalled" || worker.State == "landed") && strings.HasPrefix(worker.Name, workerPrefix) && !inNodeList(worker.Name) {
+			err := concourseClient.PruneWorker(worker.Name)
+			if err != nil {
+				glog.Errorf("Could not prune stale worker %s: %v", worker.Name, err)
+			} else {
+				glog.Infof("Stale worker %s has been pruned.", worker.Name)
 			}
 		}
 	}

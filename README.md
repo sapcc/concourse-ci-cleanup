@@ -1,4 +1,4 @@
-# Concourse CI clean-up
+# Concourse CI cleanup
 
 This tool removes stale concourse workers when a node in Kubernetes does not exist anymore. Workers need to be named like the Kubernetes node to make this work.
 
@@ -7,7 +7,7 @@ Optionally it allows you to delete Openstack volumes with a specific pattern.
 Usage:
 ```
 $ ./concourse-ci-cleanup --help
-Usage of ./ci-cleanup:
+Usage of ./concourse-ci-cleanup:
   -alsologtostderr
     	log to standard error as well as files
   -concourse-password string
@@ -41,7 +41,7 @@ Usage of ./ci-cleanup:
   -volume-cleanup
     	Cleanup volumes in Openstack [VOLUME_CLEANUP]
   -volume-prefix string
-    	Prefix to identify stale workers [VOLUME_PREFIX]
+      Prefix to identify unused volumes [VOLUME_PREFIX]
   -worker-prefix string
     	Prefix to identify stale workers [WORKER_PREFIX]
 ```
