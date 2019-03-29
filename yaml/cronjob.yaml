@@ -1,0 +1,32 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: concourse-ci-cleanup
+  namespace: concourse
+spec:
+  schedule: "30 * * * *"
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: concourse-ci-cleanup
+            image: "sapcc/concourse-ci-cleanup:0.1.0"
+            imagePullPolicy: IfNotPresent
+            env:
+            - name: CONCOURSE_URL
+              value: https://ci.example.com
+            - name: CONCOURSE_USER
+              valueFrom:
+                secretKeyRef:
+                  name: mysecret
+                  key: ci-username
+            - name: CONCOURSE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysecret
+                  key: ci-password
+          restartPolicy: Never
+          serviceAccountName: concourse-ci-cleanup
